@@ -16,6 +16,7 @@
 package org.eclipse.leshan.client;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -23,10 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
 
 import org.eclipse.californium.elements.config.Configuration;
 import org.eclipse.leshan.client.californium.endpoint.CaliforniumClientEndpointsProvider;
@@ -34,27 +32,29 @@ import org.eclipse.leshan.client.engine.DefaultRegistrationEngineFactory;
 import org.eclipse.leshan.client.object.*;
 import org.eclipse.leshan.core.util.NamedThreadFactory;
 
-
 import static org.eclipse.leshan.client.object.Security.noSec;
 
 import org.eclipse.leshan.client.resource.LwM2mObjectEnabler;
 import org.eclipse.leshan.client.resource.ObjectsInitializer;
 import org.eclipse.leshan.client.resource.listener.ObjectsListenerAdapter;
+import org.eclipse.leshan.client.send.ManualDataSender;
 import org.eclipse.leshan.core.LwM2mId;
+import org.eclipse.leshan.core.model.InvalidDDFFileException;
+import org.eclipse.leshan.core.model.InvalidModelException;
 import org.eclipse.leshan.core.model.LwM2mModelRepository;
 import org.eclipse.leshan.core.model.ObjectLoader;
 import org.eclipse.leshan.core.model.ObjectModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class Main {
 
-    public final static String[] modelPaths = new String[]{"0-1_0.xml", "0-1_1.xml", "0.xml", "1-1_0.xml", "1-1_1.xml", "2-1_0.xml", "2.xml", "21.xml", "3-1_0.xml", "3-1_1.xml", "3.xml", "3442.xml", "4-1_0.xml", "4-1_1.xml", "4-1_2.xml", "4.xml", "5-1_0.xml", "5.xml", "6.xml", "7.xml"};
+    public final static String[] modelPaths = new String[] { "0.xml", "1-1_1.xml", "3.xml", "4.xml", "12.xml" };
 
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static final String CF_CONFIGURATION_FILENAME = "Californium3.client.properties";
-    private static final String CF_CONFIGURATION_HEADER = "Leshan Client Jerry Thesis - " + Configuration.DEFAULT_HEADER;
+    private static final String CF_CONFIGURATION_HEADER = "Leshan Client Jerry Thesis - "
+            + Configuration.DEFAULT_HEADER;
 
     // Configuration
     private int nbclients = 1;
@@ -89,11 +89,16 @@ public class Main {
     private List<LeshanClient> clients;
     private int currentClientIndex = 0;
 
-
     private Map<String, String> additionalAttributes;
 
-    private static LwM2mModelRepository createModel() {
-        List<ObjectModel> models = ObjectLoader.loadAllDefault();
+    private static LwM2mModelRepository createModel()
+            throws IOException, InvalidModelException, InvalidDDFFileException {
+        List<ObjectModel> models = new ArrayList<ObjectModel>();
+        try {
+            models.addAll(ObjectLoader.loadDdfResources("/models/", modelPaths));
+        } catch (Error e) {
+            System.out.println(e);
+        }
         return new LwM2mModelRepository(models);
     }
 
@@ -101,17 +106,15 @@ public class Main {
         String endpoint = String.format(endpointPattern, i);
         final ObjectsInitializer initializer = new ObjectsInitializer(repository.getLwM2mModel());
 
-        initializer.setClassForObject(LwM2mId.OSCORE, Oscore.class);
-        initializer.setInstancesForObject(LwM2mId.SECURITY, noSec(serverURI, 123));
-        initializer.setInstancesForObject(LwM2mId.SERVER, new Server(123, 300));
-        initializer.setInstancesForObject(LwM2mId.DEVICE, new Device("Test phone", "3310", "123456789"));
+        initializer.setInstancesForObject(LwM2mId.SECURITY, noSec(serverURI, i));
+        initializer.setInstancesForObject(LwM2mId.SERVER, new MyServer(i, 300));
+        initializer.setInstancesForObject(LwM2mId.DEVICE, new MyDevice(i));
         initializer.setInstancesForObject(LwM2mId.CONNECTIVITY_MONITORING, new ConnectivityMonitoring());
-
+        initializer.setInstancesForObject(12, new MyWlanConnectivity());
 
         List<LwM2mObjectEnabler> objectEnablers = initializer.createAll();
 
         DefaultRegistrationEngineFactory engineFactory = new DefaultRegistrationEngineFactory();
-
 
         CaliforniumClientEndpointsProvider.Builder endpointsBuilder = new CaliforniumClientEndpointsProvider.Builder();
         Configuration clientCoapConfig = endpointsBuilder.createDefaultConfiguration();
@@ -122,18 +125,18 @@ public class Main {
             clientCoapConfig.store(configFile, CF_CONFIGURATION_HEADER);
         }
 
-
         endpointsBuilder.setConfiguration(clientCoapConfig);
         endpointsBuilder.setClientAddress(new InetSocketAddress(0).getAddress());
 
         LeshanClientBuilder builder = new LeshanClientBuilder(endpoint);
 
         builder.setObjects(objectEnablers);
-        builder.setRegistrationEngineFactory(engineFactory);
         builder.setEndpointsProvider(endpointsBuilder.build());
+        builder.setDataSenders(new ManualDataSender());
+
+        builder.setRegistrationEngineFactory(engineFactory);
 
         final LeshanClient client = builder.build();
-
         client.getObjectTree().addListener(new ObjectsListenerAdapter() {
 
             @Override
@@ -212,13 +215,14 @@ public class Main {
         this.additionalAttributes = additionalAttributes;
     }
 
-    public LeshanClient createClient(int i) {
+    public LeshanClient createClient(int i) throws IOException, InvalidModelException, InvalidDDFFileException {
         LwM2mModelRepository repository = createModel();
+
         LeshanClient client = createLeshanClient(repository, serverURI, i);
         return client;
     }
 
-    public void createClients() {
+    public void createClients() throws IOException, InvalidModelException, InvalidDDFFileException {
         clients = new ArrayList<>(nbclients);
         for (int i = 1; i <= nbclients; i++) {
             clients.add(createClient(i));
@@ -270,4 +274,3 @@ public class Main {
         executor.shutdown();
     }
 }
-

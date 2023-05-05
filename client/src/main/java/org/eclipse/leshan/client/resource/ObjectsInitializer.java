@@ -33,8 +33,10 @@ import org.eclipse.leshan.core.util.Validate;
 /**
  * An helper to create {@link LwM2mObjectEnabler}.
  * <p>
- * This class is the simple way to add support of a LWM2M Object to your Leshan client. If you need more flexibility you
- * could consider to implement {@link LwM2mObjectEnabler} directly or inherit {@link BaseObjectEnabler}.
+ * This class is the simple way to add support of a LWM2M Object to your Leshan
+ * client. If you need more flexibility you
+ * could consider to implement {@link LwM2mObjectEnabler} directly or inherit
+ * {@link BaseObjectEnabler}.
  * <p>
  * To use this class, you first call the methods :
  * <ul>
@@ -60,7 +62,8 @@ public class ObjectsInitializer {
     protected LwM2mModel model;
 
     /**
-     * Create an object initializer using a {@link StaticModel} containing all the default LWM2M object definition. (see
+     * Create an object initializer using a {@link StaticModel} containing all the
+     * default LWM2M object definition. (see
      * {@link ObjectLoader#loadDefault()}.
      */
     public ObjectsInitializer() {
@@ -68,7 +71,8 @@ public class ObjectsInitializer {
     }
 
     /**
-     * Create an object initializer using the given {@link LwM2mModel}. You could create your own model or use
+     * Create an object initializer using the given {@link LwM2mModel}. You could
+     * create your own model or use
      * {@link ObjectLoader} to load model from files.
      */
     public ObjectsInitializer(LwM2mModel model) {
@@ -81,10 +85,12 @@ public class ObjectsInitializer {
     }
 
     /**
-     * Set a {@link LwM2mInstanceEnablerFactory} for a given Id. This factory will be used to create
+     * Set a {@link LwM2mInstanceEnablerFactory} for a given Id. This factory will
+     * be used to create
      * {@link LwM2mInstanceEnabler} on {@link CreateRequest}.
      */
     public void setFactoryForObject(int objectId, LwM2mInstanceEnablerFactory factory) {
+        System.out.println(model.getObjectModel(objectId));
         if (model.getObjectModel(objectId) == null) {
             throw new IllegalArgumentException(
                     "Cannot set Instance Factory for Object " + objectId + " because no model is defined for this id.");
@@ -94,7 +100,8 @@ public class ObjectsInitializer {
     }
 
     /**
-     * Set a {@link LwM2mInstanceEnablerFactory} which use the default constructor of the given class to create
+     * Set a {@link LwM2mInstanceEnablerFactory} which use the default constructor
+     * of the given class to create
      * {@link LwM2mInstanceEnabler}.
      */
     public void setClassForObject(int objectId, Class<? extends LwM2mInstanceEnabler> clazz) {
@@ -109,12 +116,16 @@ public class ObjectsInitializer {
     }
 
     /**
-     * Set instances which will be available at start up for the given object. If there is no
-     * {@link LwM2mInstanceEnablerFactory} defined for this object. The {@link ObjectsInitializer} will create a
-     * {@link LwM2mInstanceEnablerFactory} which uses the default constructor of the class of one of the given
+     * Set instances which will be available at start up for the given object. If
+     * there is no
+     * {@link LwM2mInstanceEnablerFactory} defined for this object. The
+     * {@link ObjectsInitializer} will create a
+     * {@link LwM2mInstanceEnablerFactory} which uses the default constructor of the
+     * class of one of the given
      * instances.
      */
     public void setInstancesForObject(int objectId, LwM2mInstanceEnabler... instances) {
+        System.out.println(instances[objectId]);
         ObjectModel objectModel = model.getObjectModel(objectId);
         if (objectModel == null) {
             throw new IllegalArgumentException(
@@ -137,11 +148,15 @@ public class ObjectsInitializer {
     }
 
     /**
-     * Add dummy instance for each given <code>objectId</code>. ObjectId can be repeated to create several dummy
-     * instances. A dummy instance is just a very simple instance implementation which respect the object model and
-     * return some random values. A good way to begin to test Leshan client but not adapted to production environment.
+     * Add dummy instance for each given <code>objectId</code>. ObjectId can be
+     * repeated to create several dummy
+     * instances. A dummy instance is just a very simple instance implementation
+     * which respect the object model and
+     * return some random values. A good way to begin to test Leshan client but not
+     * adapted to production environment.
      *
-     * @param objectIds the list of object id. For each id a dummy instance will be created.
+     * @param objectIds the list of object id. For each id a dummy instance will be
+     *                  created.
      */
     public void setDummyInstancesForObject(int... objectIds) {
         // create a map (id => nb instances)
@@ -177,7 +192,8 @@ public class ObjectsInitializer {
     }
 
     /**
-     * Create an {@link LwM2mObjectEnabler} for each object to which you associated an "instances", "object class" or
+     * Create an {@link LwM2mObjectEnabler} for each object to which you associated
+     * an "instances", "object class" or
      * "factory".
      *
      * @return a list of LwM2MObjectEnabler
@@ -190,6 +206,8 @@ public class ObjectsInitializer {
         Set<Integer> ids = new HashSet<>();
         ids.addAll(factories.keySet());
         ids.addAll(instances.keySet());
+
+        System.out.println(ids);
 
         // create objects
         int[] idArray = new int[ids.size()];
@@ -246,6 +264,8 @@ public class ObjectsInitializer {
         if (instanceFactory != null)
             return instanceFactory;
 
+        System.out.println("objectmodel" + objectModel.name + " " + objectModel.id);
+
         // if there are no factory for this object check in instance list.
         LwM2mInstanceEnabler[] instances = this.instances.get(objectModel.id);
         if (instances != null) {
@@ -266,10 +286,12 @@ public class ObjectsInitializer {
     }
 
     protected LwM2mObjectEnabler createNodeEnabler(ObjectModel objectModel) {
+        System.out.println("Create object enabler...");
         Map<Integer, LwM2mInstanceEnabler> instances = new HashMap<>();
         LwM2mInstanceEnabler[] newInstances = createInstances(objectModel);
         for (LwM2mInstanceEnabler instance : newInstances) {
             // set id if not already set
+            System.out.println(instances.keySet());
             if (instance.getId() == null) {
                 int id = BaseInstanceEnablerFactory.generateNewInstanceId(instances.keySet());
                 instance.setId(id);
@@ -310,4 +332,5 @@ public class ObjectsInitializer {
         };
         return factory;
     }
+
 }

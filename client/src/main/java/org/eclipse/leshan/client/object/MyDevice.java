@@ -36,10 +36,16 @@ public class MyDevice extends BaseInstanceEnabler implements Destroyable {
     private final Timer timer;
     private String utcOffset = new SimpleDateFormat("X").format(Calendar.getInstance().getTime());
     private String timeZone = TimeZone.getDefault().getID();
+    private Integer index;
 
     public MyDevice() {
+        this.timer = new Timer("Device-Current Time");
+    }
+
+    public MyDevice(Integer index) {
         // notify new date each 5 second
         this.timer = new Timer("Device-Current Time");
+        this.index = index;
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -50,11 +56,12 @@ public class MyDevice extends BaseInstanceEnabler implements Destroyable {
 
     @Override
     public ReadResponse read(ServerIdentity identity, int resourceid) {
+
         if (!identity.isSystem())
             LOG.info("Read on Device resource /{}/{}/{}", getModel().id, getId(), resourceid);
         switch (resourceid) {
             case 0:
-                return ReadResponse.success(resourceid, getManufacturer());
+                return ReadResponse.success(resourceid, getManufacturer() + index);
             case 1:
                 return ReadResponse.success(resourceid, getModelNumber());
             case 2:
@@ -136,15 +143,15 @@ public class MyDevice extends BaseInstanceEnabler implements Destroyable {
     }
 
     private String getManufacturer() {
-        return "Nokia";
+        return "Raspberry";
     }
 
     private String getModelNumber() {
-        return "Model 500";
+        return "3";
     }
 
     private String getSerialNumber() {
-        return "LT-500-000-0001";
+        return "Serial number";
     }
 
     private String getFirmwareVersion() {

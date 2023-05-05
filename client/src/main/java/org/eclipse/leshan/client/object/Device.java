@@ -20,34 +20,36 @@ package org.eclipse.leshan.client.object;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.EnumSet;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.eclipse.leshan.client.resource.BaseInstanceEnabler;
-import org.eclipse.leshan.client.resource.LwM2mInstanceEnabler;
 import org.eclipse.leshan.client.servers.ServerIdentity;
 import org.eclipse.leshan.core.model.ObjectModel;
 import org.eclipse.leshan.core.model.ResourceModel.Type;
 import org.eclipse.leshan.core.node.LwM2mResource;
-import org.eclipse.leshan.core.request.BindingMode;
 import org.eclipse.leshan.core.request.argument.Arguments;
 import org.eclipse.leshan.core.response.ExecuteResponse;
 import org.eclipse.leshan.core.response.ReadResponse;
 import org.eclipse.leshan.core.response.WriteResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * A simple {@link LwM2mInstanceEnabler} for the Device (3) object.
- */
 public class Device extends BaseInstanceEnabler {
 
-    private static final List<Integer> supportedResources = Arrays.asList(0, 1, 2, 11, 14, 15, 16);
+    private static final Logger LOG = LoggerFactory.getLogger(Device.class);
+    private static final List<Integer> supportedResources = Arrays.asList(0, 1, 2, 3, 9, 10, 11, 13, 14, 15, 16, 17, 18,
+            19, 20, 21);
 
     private String manufacturer;
     private String modelNumber;
     private String serialNumber;
-    private EnumSet<BindingMode> supportedBinding;
 
     private String timezone = TimeZone.getDefault().getID();
     private String utcOffset = new SimpleDateFormat("X").format(Calendar.getInstance().getTime());
@@ -60,43 +62,43 @@ public class Device extends BaseInstanceEnabler {
         this.manufacturer = manufacturer;
         this.modelNumber = modelNumber;
         this.serialNumber = serialNumber;
-        this.supportedBinding = EnumSet.of(BindingMode.U);
-    }
-
-    public Device(String manufacturer, String modelNumber, String serialNumber, EnumSet<BindingMode> supportedBinding) {
-        this.manufacturer = manufacturer;
-        this.modelNumber = modelNumber;
-        this.serialNumber = serialNumber;
-        this.supportedBinding = supportedBinding;
     }
 
     @Override
     public ReadResponse read(ServerIdentity identity, int resourceid) {
-
+        if (!identity.isSystem())
+            LOG.info("Read on Device resource /{}/{}/{}", getModel().id, getId(), resourceid);
         switch (resourceid) {
-        case 0: // manufacturer
-            return ReadResponse.success(resourceid, manufacturer);
+            case 0: // manufacturer
+                return ReadResponse.success(resourceid, "jerryboomboom");
 
-        case 1: // model number
-            return ReadResponse.success(resourceid, modelNumber);
+            case 1: // model number
+                return ReadResponse.success(resourceid, modelNumber);
 
-        case 2: // serial number
-            return ReadResponse.success(resourceid, serialNumber);
+            case 2: // serial number
+                return ReadResponse.success(resourceid, serialNumber);
 
-        case 11: // error codes
-            return ReadResponse.success(resourceid, new HashMap<Integer, Integer>(), Type.INTEGER);
+            case 10:
 
-        case 14: // utc offset
-            return ReadResponse.success(resourceid, utcOffset);
+                return ReadResponse.success(resourceid, getDeviceFreeMemory());
 
-        case 15: // timezone
-            return ReadResponse.success(resourceid, timezone);
+            case 11: // error codes
+                return ReadResponse.success(resourceid, new HashMap<Integer, Integer>(), Type.INTEGER);
 
-        case 16: // supported binding and modes
-            return ReadResponse.success(resourceid, BindingMode.toString(supportedBinding));
+            case 14: // utc offset
+                return ReadResponse.success(resourceid, utcOffset);
 
-        default:
-            return super.read(identity, resourceid);
+            case 15: // timezone
+                return ReadResponse.success(resourceid, timezone);
+
+            case 16: // supported binding and modes
+                return ReadResponse.success(resourceid, "U");
+
+            case 21:
+                return ReadResponse.success(resourceid, getDeviceTotalMemory());
+
+            default:
+                return super.read(identity, resourceid);
         }
     }
 
@@ -105,18 +107,18 @@ public class Device extends BaseInstanceEnabler {
 
         switch (resourceid) {
 
-        case 14: // utc offset
-            utcOffset = (String) value.getValue();
-            fireResourceChange(resourceid);
-            return WriteResponse.success();
+            case 14: // utc offset
+                utcOffset = (String) value.getValue();
+                fireResourceChange(resourceid);
+                return WriteResponse.success();
 
-        case 15: // timezone
-            timezone = (String) value.getValue();
-            fireResourceChange(resourceid);
-            return WriteResponse.success();
+            case 15: // timezone
+                timezone = (String) value.getValue();
+                fireResourceChange(resourceid);
+                return WriteResponse.success();
 
-        default:
-            return super.write(identity, replace, resourceid, value);
+            default:
+                return super.write(identity, replace, resourceid, value);
         }
     }
 
@@ -133,14 +135,14 @@ public class Device extends BaseInstanceEnabler {
     @Override
     public void reset(int resourceid) {
         switch (resourceid) {
-        case 14:
-            utcOffset = new SimpleDateFormat("X").format(Calendar.getInstance().getTime());
-            break;
-        case 15:
-            timezone = TimeZone.getDefault().getID();
-            break;
-        default:
-            super.reset(resourceid);
+            case 14:
+                utcOffset = new SimpleDateFormat("X").format(Calendar.getInstance().getTime());
+                break;
+            case 15:
+                timezone = TimeZone.getDefault().getID();
+                break;
+            default:
+                super.reset(resourceid);
         }
     }
 
@@ -148,4 +150,15 @@ public class Device extends BaseInstanceEnabler {
     public List<Integer> getAvailableResourceIds(ObjectModel model) {
         return supportedResources;
     }
+
+    private long getDeviceTotalMemory() {
+        return Runtime.getRuntime().totalMemory();
+    }
+
+    private long getDeviceFreeMemory() {
+        System.out.println("Reading device free memory....");
+
+        return Runtime.getRuntime().freeMemory() / 1024;
+    }
+
 }

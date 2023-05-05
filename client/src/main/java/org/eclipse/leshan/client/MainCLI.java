@@ -8,12 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import picocli.CommandLine;
-import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ITypeConverter;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.TypeConversionException;
-
 
 @Command(name = "leshan-clients-launcher", mixinStandardHelpOptions = true, sortOptions = false, version = "0.1", description = "Launch several LWM2M clients. CoAP and CoAPs with PSK is supported")
 public class MainCLI implements Callable<Integer> {
@@ -30,40 +28,37 @@ public class MainCLI implements Callable<Integer> {
     }
 
     // CLI OPTIONS
-    @Option(names = {"-u",
-            "--server-url"}, required = true, description = "URL of the LWM2M Server or LWM2M bootstrap server if -b option is used, e.g: coap://localhost:5683. Use coaps to use PSK.")
+    @Option(names = { "-u",
+            "--server-url" }, required = true, description = "URL of the LWM2M Server or LWM2M bootstrap server if -b option is used, e.g: coap://localhost:5683. Use coaps to use PSK.")
     private String serverURL;
-    @Option(names = {"-n",
-            "--number-of-client"}, description = "Number of clients to simulate.\nDefault: ${DEFAULT-VALUE} client.")
+    @Option(names = { "-n",
+            "--number-of-client" }, description = "Number of clients to simulate.\nDefault: ${DEFAULT-VALUE} client.")
     private int nbClients = 1;
-    @Option(names = {"-s",
-            "--start-time"}, description = "Time to start all clients in seconds.\nDefault: number-of-client*3 seconds.")
+    @Option(names = { "-s",
+            "--start-time" }, description = "Time to start all clients in seconds.\nDefault: number-of-client*3 seconds.")
     private Integer startTime = null;
-    @Option(names = {"-c",
-            "--communication-period"}, description = "Number of time between 2 update requests in seconds.\nDefault: ${DEFAULT-VALUE} seconds.")
+    @Option(names = { "-c",
+            "--communication-period" }, description = "Number of time between 2 update requests in seconds.\nDefault: ${DEFAULT-VALUE} seconds.")
     private int communicationPeriodInSeconds = 60;
-    @Option(names = {"-b", "--bootstrap"}, description = "Use this option to bootstrap instead of register.")
+    @Option(names = { "-b", "--bootstrap" }, description = "Use this option to bootstrap instead of register.")
     private boolean bootstrap = false;
-    @Option(names = {"-r", "--reconnect-on-update"}, description = "Reconnect/rehandshake on update.")
+    @Option(names = { "-r", "--reconnect-on-update" }, description = "Reconnect/rehandshake on update.")
     private boolean reconnectOnUpdate = false;
-    @Option(names = {"-f", "--no-resume"}, description = "Force reconnect/rehandshake on update.")
+    @Option(names = { "-f", "--no-resume" }, description = "Force reconnect/rehandshake on update.")
     private boolean noSessionResumption = false;
-    @Option(names = {"-d", "--duration"}, description = "Duration of the simulation in seconds.\nDefault: no limit.")
+    @Option(names = { "-d", "--duration" }, description = "Duration of the simulation in seconds.\nDefault: no limit.")
     private Integer durationInSeconds;
-    @Option(names = {"-e",
-            "--endpoint-pattern"}, description = "A String.format pattern used to create the client endpoint name from this index number.\nDefault: ${DEFAULT-VALUE}.")
+    @Option(names = { "-e",
+            "--endpoint-pattern" }, description = "A String.format pattern used to create the client endpoint name from this index number.\nDefault: ${DEFAULT-VALUE}.")
     private String endpointPattern = "LESHAN%08d";
-    @Option(names = {"-i",
-            "--pskid-pattern"}, description = "A String.format pattern used to create the psk identity from this index number.\nDefault: use --endpoint-pattern.")
+    @Option(names = { "-i",
+            "--pskid-pattern" }, description = "A String.format pattern used to create the psk identity from this index number.\nDefault: use --endpoint-pattern.")
     private String pskIdPattern;
-    @Option(names = {"-k",
-            "--pskkey-pattern"}, description = "A String.format pattern used to create the psk identity from this index number. Value must be an Hexadecimal String.\nDefault ${DEFAULT-VALUE}")
+    @Option(names = { "-k",
+            "--pskkey-pattern" }, description = "A String.format pattern used to create the psk identity from this index number. Value must be an Hexadecimal String.\nDefault ${DEFAULT-VALUE}")
     private String pskKeyPattern = "1234567890ABCDEF%08X";
-    @Option(names = {"-a", "--additional-attributes"}, description = "Additional attribute use at registration.")
+    @Option(names = { "-a", "--additional-attributes" }, description = "Additional attribute use at registration.")
     private Map<String, String> additionalAttributes;
-
-    @ArgGroup(exclusive = false)
-    private Graphite graphite;
 
     public static void main(String[] args) {
         CommandLine commandLine = new CommandLine(new MainCLI());
@@ -98,7 +93,6 @@ public class MainCLI implements Callable<Integer> {
         launcher.setPskIdPattern(pskIdPattern);
         launcher.setPskKeyPattern(pskKeyPattern);
         launcher.setAdditionalAttributes(additionalAttributes);
-
 
         launcher.createClients();
         launcher.start();
@@ -139,13 +133,4 @@ public class MainCLI implements Callable<Integer> {
         }
     }
 
-    static class Graphite {
-
-        @Option(names = {"-g", "--graphite-report"}, description = "Report to graphite server.")
-        boolean activate = false;
-        @Option(names = "--graphite-url", description = "Url of graphite server.\nDefault: \"${DEFAULT-VALUE}\".")
-        InetSocketAddress serverAddress = new InetSocketAddress("localhost", 2003);
-        @Option(names = "--graphite-polling-period", description = "Polling period to push data to graphite in seconds.\nDefault: ${DEFAULT-VALUE} seconds.")
-        int pollingPeriodInSec = 5;
-    }
 }

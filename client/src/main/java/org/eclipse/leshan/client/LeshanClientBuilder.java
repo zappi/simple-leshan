@@ -53,7 +53,8 @@ import org.eclipse.leshan.core.request.WriteAttributesRequest;
 import org.eclipse.leshan.core.util.Validate;
 
 /**
- * Helper class to build and configure a Californium based Leshan Lightweight M2M client.
+ * Helper class to build and configure a Californium based Leshan Lightweight
+ * M2M client.
  */
 public class LeshanClientBuilder {
 
@@ -80,17 +81,21 @@ public class LeshanClientBuilder {
     private LwM2mClientEndpointsProvider endpointsProvider;
 
     /**
-     * Creates a new instance for setting the configuration options for a {@link LeshanClient} instance.
+     * Creates a new instance for setting the configuration options for a
+     * {@link LeshanClient} instance.
      * <p>
      * The builder is initialized with the following default values:
      * <ul>
-     * <li><em>local address</em>: a local address and an ephemeral port (picked up during binding)</li>
+     * <li><em>local address</em>: a local address and an ephemeral port (picked up
+     * during binding)</li>
      * <li><em>object enablers</em>:
      * <ul>
-     * <li>Security(0) with one instance (DM server security): uri=<em>coap://leshan.eclipseprojects.io:5683</em>,
+     * <li>Security(0) with one instance (DM server security):
+     * uri=<em>coap://leshan.eclipseprojects.io:5683</em>,
      * mode=NoSec</li>
      * <li>Server(1) with one instance (DM server): id=12345, lifetime=5minutes</li>
-     * <li>Device(3): manufacturer=Eclipse Leshan, modelNumber=model12345, serialNumber=12345</li>
+     * <li>Device(3): manufacturer=Eclipse Leshan, modelNumber=model12345,
+     * serialNumber=12345</li>
      * </ul>
      * </li>
      * </ul>
@@ -105,7 +110,8 @@ public class LeshanClientBuilder {
     /**
      * Sets the list of objects enablers.
      * <p>
-     * The easier way to create {@link LwM2mObjectEnabler} is to use the {@link ObjectsInitializer} but you can
+     * The easier way to create {@link LwM2mObjectEnabler} is to use the
+     * {@link ObjectsInitializer} but you can
      * implement your own {@link LwM2mObjectEnabler} if you need more flexibility.
      */
     public LeshanClientBuilder setObjects(List<? extends LwM2mObjectEnabler> objectEnablers) {
@@ -139,9 +145,11 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Set the {@link LwM2mEncoder} which will encode {@link LwM2mNode} with supported content format.
+     * Set the {@link LwM2mEncoder} which will encode {@link LwM2mNode} with
+     * supported content format.
      * <p>
-     * By default the {@link DefaultLwM2mEncoder} is used. It supports Text, Opaque, TLV and JSON format.
+     * By default the {@link DefaultLwM2mEncoder} is used. It supports Text, Opaque,
+     * TLV and JSON format.
      */
     public LeshanClientBuilder setEncoder(LwM2mEncoder encoder) {
         this.encoder = encoder;
@@ -149,9 +157,11 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Set the {@link LwM2mDecoder} which will decode data in supported content format to create {@link LwM2mNode}.
+     * Set the {@link LwM2mDecoder} which will decode data in supported content
+     * format to create {@link LwM2mNode}.
      * <p>
-     * By default the {@link DefaultLwM2mDecoder} is used. It supports Text, Opaque, TLV and JSON format.
+     * By default the {@link DefaultLwM2mDecoder} is used. It supports Text, Opaque,
+     * TLV and JSON format.
      */
     public LeshanClientBuilder setDecoder(LwM2mDecoder decoder) {
         this.decoder = decoder;
@@ -169,7 +179,8 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Set the {@link LwM2mAttributeParser} used to parse {@link LwM2mAttribute} from {@link WriteAttributesRequest}.
+     * Set the {@link LwM2mAttributeParser} used to parse {@link LwM2mAttribute}
+     * from {@link WriteAttributesRequest}.
      * <p>
      * By default the {@link DefaultLwM2mAttributeParser} is used.
      */
@@ -189,12 +200,15 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Set the {@link RegistrationEngineFactory} which is responsible to create the {@link RegistrationEngine}.
+     * Set the {@link RegistrationEngineFactory} which is responsible to create the
+     * {@link RegistrationEngine}.
      * <p>
-     * The {@link RegistrationEngine} is responsible to manage all the client lifecycle
+     * The {@link RegistrationEngine} is responsible to manage all the client
+     * lifecycle
      * (bootstrap/register/update/deregister ...)
      * <p>
-     * By default a {@link DefaultRegistrationEngineFactory} is used. Look at this class to change some default timeout
+     * By default a {@link DefaultRegistrationEngineFactory} is used. Look at this
+     * class to change some default timeout
      * value.
      *
      * @return the builder for fluent client creation.
@@ -205,7 +219,8 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Set the additionalAttributes for {@link org.eclipse.leshan.core.request.RegisterRequest}.
+     * Set the additionalAttributes for
+     * {@link org.eclipse.leshan.core.request.RegisterRequest}.
      */
     public LeshanClientBuilder setAdditionalAttributes(Map<String, String> additionalAttributes) {
         this.additionalAttributes = additionalAttributes;
@@ -223,7 +238,8 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Set a {@link BootstrapConsistencyChecker} which is used to valid client state after a bootstrap session.
+     * Set a {@link BootstrapConsistencyChecker} which is used to valid client state
+     * after a bootstrap session.
      * <p>
      * By default a {@link DefaultBootstrapConsistencyChecker} is used.
      *
@@ -235,14 +251,20 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Set a shared executor. This executor will be used everywhere it is possible. This is generally used when you want
-     * to limit the number of thread to use or if you want to simulate a lot of clients sharing the same thread pool.
+     * Set a shared executor. This executor will be used everywhere it is possible.
+     * This is generally used when you want
+     * to limit the number of thread to use or if you want to simulate a lot of
+     * clients sharing the same thread pool.
      * <p>
-     * Currently UDP and DTLS receiver and sender thread could not be share meaning that you will at least consume 2
-     * thread by client + the number of thread available in the shared executor (see <a
-     * href=https://github.com/eclipse/californium/issues/1203>californium#1203 issue</a>)
+     * Currently UDP and DTLS receiver and sender thread could not be share meaning
+     * that you will at least consume 2
+     * thread by client + the number of thread available in the shared executor (see
+     * <a
+     * href=https://github.com/eclipse/californium/issues/1203>californium#1203
+     * issue</a>)
      * <p>
-     * Executor will not be shutdown automatically on {@link LeshanClient#destroy(boolean)}, this should be done
+     * Executor will not be shutdown automatically on
+     * {@link LeshanClient#destroy(boolean)}, this should be done
      * manually.
      *
      * @param executor the executor to share.
@@ -262,18 +284,17 @@ public class LeshanClientBuilder {
     }
 
     /**
-     * Creates an instance of {@link LeshanClient} based on the properties set on this builder.
+     * Creates an instance of {@link LeshanClient} based on the properties set on
+     * this builder.
      */
     public LeshanClient build() {
-        System.out.println("object enablers");
-        System.out.println(objectEnablers);
         if (objectEnablers == null) {
             ObjectsInitializer initializer = new ObjectsInitializer();
             initializer.setInstancesForObject(LwM2mId.SECURITY,
                     Security.noSec("coap://leshan.eclipseprojects.io:5683", 12345));
             initializer.setInstancesForObject(LwM2mId.SERVER, new Server(12345, 5 * 60));
             initializer.setInstancesForObject(LwM2mId.DEVICE,
-                    new Device("Eclipse Leshan", "model12345", "12345", EnumSet.of(BindingMode.U)));
+                    new Device("Eclipse Leshan", "model12345", "12345"));
             objectEnablers = initializer.createAll();
         }
         if (dataSenders == null)
@@ -301,32 +322,40 @@ public class LeshanClientBuilder {
     /**
      * Create the <code>LeshanClient</code>.
      * <p>
-     * You can extend <code>LeshanClientBuilder</code> and override this method to create a new builder which will be
+     * You can extend <code>LeshanClientBuilder</code> and override this method to
+     * create a new builder which will be
      * able to build an extended <code>LeshanClient </code>.
      * <p>
      * See all the setters of this builder for more documentation about parameters.
      *
      * @param endpoint               The endpoint name for this client.
-     * @param objectEnablers         The list of object enablers. An enabler adds to support for a given LWM2M object to the
+     * @param objectEnablers         The list of object enablers. An enabler adds to
+     *                               support for a given LWM2M object to the
      *                               client.
-     * @param trustStore             The optional trust store for verifying X.509 server certificates.
-     * @param checker                Used to check if client state is consistent after a bootstrap session.
-     * @param additionalAttributes   Some extra (out-of-spec) attributes to add to the register request.
-     * @param bsAdditionalAttributes Some extra (out-of-spec) attributes to add to the bootstrap request.
+     * @param trustStore             The optional trust store for verifying X.509
+     *                               server certificates.
+     * @param checker                Used to check if client state is consistent
+     *                               after a bootstrap session.
+     * @param additionalAttributes   Some extra (out-of-spec) attributes to add to
+     *                               the register request.
+     * @param bsAdditionalAttributes Some extra (out-of-spec) attributes to add to
+     *                               the bootstrap request.
      * @param encoder                used to encode request payload.
      * @param decoder                used to decode response payload.
      * @param sharedExecutor         an optional shared executor.
-     * @param linkSerializer         a serializer {@link LinkSerializer} used to serialize a CoRE Link.
-     * @param attributeParser        a {@link LwM2mAttributeParser} used to parse {@link LwM2mAttribute} from
+     * @param linkSerializer         a serializer {@link LinkSerializer} used to
+     *                               serialize a CoRE Link.
+     * @param attributeParser        a {@link LwM2mAttributeParser} used to parse
+     *                               {@link LwM2mAttribute} from
      *                               {@link WriteAttributesRequest}.
      * @return the new {@link LeshanClient}
      */
     protected LeshanClient createLeshanClient(String endpoint, List<? extends LwM2mObjectEnabler> objectEnablers,
-                                              List<DataSender> dataSenders, List<Certificate> trustStore, RegistrationEngineFactory engineFactory,
-                                              BootstrapConsistencyChecker checker, Map<String, String> additionalAttributes,
-                                              Map<String, String> bsAdditionalAttributes, LwM2mEncoder encoder, LwM2mDecoder decoder,
-                                              ScheduledExecutorService sharedExecutor, LinkSerializer linkSerializer,
-                                              LwM2mAttributeParser attributeParser, LwM2mClientEndpointsProvider endpointsProvider) {
+            List<DataSender> dataSenders, List<Certificate> trustStore, RegistrationEngineFactory engineFactory,
+            BootstrapConsistencyChecker checker, Map<String, String> additionalAttributes,
+            Map<String, String> bsAdditionalAttributes, LwM2mEncoder encoder, LwM2mDecoder decoder,
+            ScheduledExecutorService sharedExecutor, LinkSerializer linkSerializer,
+            LwM2mAttributeParser attributeParser, LwM2mClientEndpointsProvider endpointsProvider) {
         return new LeshanClient(endpoint, objectEnablers, dataSenders, trustStore, engineFactory, checker,
                 additionalAttributes, bsAdditionalAttributes, encoder, decoder, sharedExecutor, linkSerializer,
                 attributeParser, endpointsProvider);

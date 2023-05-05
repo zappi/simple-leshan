@@ -40,7 +40,8 @@ import org.eclipse.leshan.core.response.ReadResponse;
 import org.eclipse.leshan.core.response.WriteResponse;
 
 /**
- * A abstract implementation of {@link LwM2mInstanceEnabler}. It could be use as base for any
+ * A abstract implementation of {@link LwM2mInstanceEnabler}. It could be use as
+ * base for any
  * {@link LwM2mInstanceEnabler} implementation.
  */
 public class BaseInstanceEnabler implements LwM2mInstanceEnabler {
@@ -98,12 +99,15 @@ public class BaseInstanceEnabler implements LwM2mInstanceEnabler {
     /**
      * To be used to notify that 1 or several resources change.
      * <p>
-     * This method SHOULD NOT be called in a synchronize block or any thread synchronization tools to avoid any risk of
+     * This method SHOULD NOT be called in a synchronize block or any thread
+     * synchronization tools to avoid any risk of
      * deadlock.
      * <p>
-     * Calling this method is needed to trigger NOTIFICATION when an observe relation is established.
+     * Calling this method is needed to trigger NOTIFICATION when an observe
+     * relation is established.
      *
-     * @param resources the list of path of resource and resource instances which changes.
+     * @param resources the list of path of resource and resource instances which
+     *                  changes.
      * @see #getResourcePath(int)
      * @see #getResourceInstancePath(int, int)
      */
@@ -194,7 +198,8 @@ public class BaseInstanceEnabler implements LwM2mInstanceEnabler {
 
                 } else if (identity.isLwm2mServer()) {
                     if (resourceModel.operations.isWritable()) {
-                        // For writable resource, Write resource if there something to write, if not reset value
+                        // For writable resource, Write resource if there something to write, if not
+                        // reset value
                         LwM2mResource writeResource = resourcesToWrite.remove(resourceModel.id);
                         if (null != writeResource) {
                             write(identity, true, resourceModel.id, writeResource);
@@ -224,7 +229,7 @@ public class BaseInstanceEnabler implements LwM2mInstanceEnabler {
 
     @Override
     public WriteResponse write(ServerIdentity identity, boolean addIfAbsent, int resourceid, int resourceInstanceId,
-                               LwM2mResourceInstance value) {
+            LwM2mResourceInstance value) {
 
         // this is a sub-optimal default implementation
         if (!addIfAbsent) {
